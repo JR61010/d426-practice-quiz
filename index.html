@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>D426 Practice Quiz</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:20px;color:#222}.container{max-width:900px;margin:auto;background:white;padding:25px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1)}h1{text-align:center}.question{border-bottom:1px solid #ddd;padding:18px 0}.answers label{display:block;margin:8px 0;padding:8px;border-radius:6px;background:#f7f7f7;cursor:pointer}.answers label:hover{background:#e9f0ff}button{margin-top:16px;padding:10px 16px;border:0;border-radius:8px;background:#2563eb;color:white;font-size:15px;cursor:pointer}button:hover{background:#1d4ed8}button.secondary{background:#4b5563}button.secondary:hover{background:#374151}.result{font-weight:bold;margin-top:8px}.correct{color:green}.incorrect{color:#b91c1c}.explain{font-size:.95em;color:#444;margin-top:5px}.score{font-size:1.3em;font-weight:bold;margin-top:20px;text-align:center}.topBtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.small{font-size:.9em;text-align:center;color:#555}.question button{margin-top:8px}</style>
+</head>
+<body>
+<div class="container">
+<h1>D426 Practice Quiz</h1>
+<p class="small">Choose an answer, then click <b>Submit This Question</b> to see the answer right away. At the end, click <b>Submit Whole Quiz</b> to see your total score.</p>
+<div class="topBtns"><button onclick="submitQuiz()">Submit Whole Quiz</button><button class="secondary" onclick="resetQuiz()">Reset Quiz</button></div>
+<div id="quiz"></div>
+<div class="score" id="score"></div>
+</div>
+<script>
+const questions = [
+{q:"What is the primary responsibility of a database administrator?",a:["Writing front-end code","Securing the database and managing access","Creating web graphics","Replacing SQL statements"],c:1,e:"A DBA secures the database system, controls access, and helps maintain availability."},
+{q:"Which database component interprets queries and creates an execution plan?",a:["Storage manager","Transaction manager","Query processor","Database application"],c:2,e:"The query processor interprets queries, optimizes them, and returns results."},
+{q:"Which component translates query instructions into low-level file-system commands?",a:["Storage manager","Query processor","API","Authorization module"],c:0,e:"The storage manager handles low-level access to stored data."},
+{q:"Which SQL statement retrieves data from a table?",a:["INSERT","SELECT","UPDATE","DELETE"],c:1,e:"SELECT is used to retrieve data."},
+{q:"Which SQL statement inserts rows into a table?",a:["CREATE","SELECT","INSERT","DROP"],c:2,e:"INSERT adds new rows to a table."},
+{q:"Which SQL statement modifies existing rows?",a:["UPDATE","DELETE","ALTER","DROP"],c:0,e:"UPDATE changes existing row values."},
+{q:"Which SQL statement deletes rows from a table?",a:["REMOVE","DELETE","DROP","ALTER"],c:1,e:"DELETE removes rows from a table."},
+{q:"Which data type stores whole number values?",a:["VARCHAR","DATE","INT","DECIMAL"],c:2,e:"INT stores integer values."},
+{q:"Which data type stores text values?",a:["VARCHAR","INT","DECIMAL","DATE"],c:0,e:"VARCHAR stores textual values."},
+{q:"Which database design phase identifies entities, relationships, and attributes without choosing a specific DBMS?",a:["Physical design","Analysis","Testing","Indexing"],c:1,e:"Analysis captures requirements independent of implementation."},
+{q:"Logical design converts entities, relationships, and attributes into what?",a:["Tables, keys, and columns","Files, folders, and permissions","Indexes only","Queries only"],c:0,e:"For relational databases, logical design maps requirements to tables, keys, and columns."},
+{q:"Physical design mainly affects what?",a:["Query results","Query processing speed","Business policy","Entity names"],c:1,e:"Physical design changes performance, not the actual results."},
+{q:"What principle says physical design should not affect query results?",a:["Referential integrity","Data independence","Normalization","Cardinality"],c:1,e:"Data independence allows storage changes without changing query results."},
+{q:"A tuple is best described as what?",a:["An unordered collection","An ordered collection of elements","A database password","A type of index"],c:1,e:"Tuples are ordered, so (a,b,c) differs from (c,b,a)."},
+{q:"A row is also known as a:",a:["Record or tuple","Field or attribute","Database or schema","Index or key"],c:0,e:"Row, record, and tuple are synonyms."},
+{q:"A column is also known as a:",a:["Tuple","Record","Field or attribute","Relation"],c:2,e:"Column, field, and attribute are synonyms."},
+{q:"Which SQL sublanguage defines database structure?",a:["DDL","DQL","DML","DCL"],c:0,e:"Data Definition Language defines database structures."},
+{q:"Which SQL sublanguage retrieves data?",a:["DML","DCL","DQL","DTL"],c:2,e:"Data Query Language is used to retrieve data."},
+{q:"Which SQL sublanguage controls user access?",a:["DDL","DQL","DML","DCL"],c:3,e:"Data Control Language controls access."},
+{q:"What does CREATE TABLE do?",a:["Deletes a table","Creates a new table with columns and data types","Updates rows","Creates a query plan"],c:1,e:"CREATE TABLE defines a new table structure."},
+{q:"What does DROP TABLE do?",a:["Deletes a table and its rows","Deletes only one row","Sorts a table","Creates an index"],c:0,e:"DROP TABLE removes the entire table and its rows."},
+{q:"What does ALTER TABLE do?",a:["Retrieves rows","Adds, deletes, or modifies columns","Starts a transaction","Creates a backup"],c:1,e:"ALTER TABLE changes an existing table structure."},
+{q:"What happens if an UPDATE statement omits the WHERE clause?",a:["No rows update","Only the first row updates","All rows update","The table is dropped"],c:2,e:"Without WHERE, UPDATE applies to every row."},
+{q:"What happens if a DELETE statement omits the WHERE clause?",a:["All rows are deleted","No rows are deleted","Only duplicates are deleted","The database closes"],c:0,e:"Without WHERE, DELETE removes all rows from the table."},
+{q:"What does TRUNCATE do?",a:["Deletes all rows from a table","Deletes the table structure","Creates an index","Filters grouped rows"],c:0,e:"TRUNCATE removes all rows, similar to DELETE without WHERE."},
+{q:"What is a primary key?",a:["A column or group of columns used to identify a row","A column that allows duplicate values only","A query result","A stored view"],c:0,e:"Primary keys uniquely identify rows."},
+{q:"A primary key made of multiple columns is called:",a:["Simple primary key","Composite primary key","Foreign key","Candidate row"],c:1,e:"Composite primary keys use multiple columns."},
+{q:"What is a foreign key?",a:["A key that references a primary key","A key that cannot be indexed","A password","A deleted key"],c:0,e:"Foreign keys reference primary keys in related tables."},
+{q:"What does a foreign key constraint help enforce?",a:["Referential integrity","Case sensitivity","Sorting order","Text formatting"],c:0,e:"Foreign key constraints reject actions that break referential integrity."},
+{q:"Which referential integrity action rejects invalid insert, update, or delete operations?",a:["CASCADE","SET NULL","RESTRICT","SET DEFAULT"],c:2,e:"RESTRICT rejects changes that violate referential integrity."},
+{q:"Which referential action propagates primary key changes to foreign keys?",a:["CASCADE","SET NULL","RESTRICT","SET DEFAULT"],c:0,e:"CASCADE carries changes through related rows."},
+{q:"What does BETWEEN mean?",a:["Less than only","Greater than only","Greater than or equal to the minimum and less than or equal to the maximum","Not equal"],c:2,e:"BETWEEN min AND max is equivalent to >= min AND <= max."},
+{q:"In a LIKE pattern, what does % match?",a:["Exactly one character","Any number of characters","Only numbers","Only spaces"],c:1,e:"% matches zero or more characters."},
+{q:"In a LIKE pattern, what does _ match?",a:["Exactly one character","Any number of characters","No characters","Only letters"],c:0,e:"_ matches exactly one character."},
+{q:"Which clause orders selected rows?",a:["HAVING","GROUP BY","ORDER BY","WHERE"],c:2,e:"ORDER BY sorts result rows."},
+{q:"Which function returns the absolute value of a number?",a:["LOWER()","TRIM()","ABS()","AVG()"],c:2,e:"ABS(n) returns the absolute value of n."},
+{q:"Which function removes leading and trailing spaces?",a:["TRIM()","LOWER()","COUNT()","MAX()"],c:0,e:"TRIM removes leading and trailing spaces."},
+{q:"Which aggregate function counts rows?",a:["SUM()","COUNT()","AVG()","MIN()"],c:1,e:"COUNT() returns the number of rows."},
+{q:"Which aggregate function computes the arithmetic mean?",a:["AVG()","SUM()","MAX()","MIN()"],c:0,e:"AVG() computes the average."},
+{q:"Which clause filters grouped results?",a:["WHERE","HAVING","ORDER BY","SELECT"],c:1,e:"HAVING filters groups after GROUP BY."},
+{q:"What is a join?",a:["A SELECT statement that combines data from two tables","A command that deletes columns","A backup method","A data type"],c:0,e:"Joins combine rows from two tables into one result."},
+{q:"Which join selects only matching rows from both tables?",a:["INNER JOIN","FULL JOIN","LEFT JOIN","RIGHT JOIN"],c:0,e:"INNER JOIN returns only rows with matches on both sides."},
+{q:"Which join selects all rows from the left table and matching rows from the right table?",a:["RIGHT JOIN","LEFT JOIN","INNER JOIN","CROSS JOIN"],c:1,e:"LEFT JOIN keeps all left-table rows."},
+{q:"Which join selects all rows from both tables regardless of match?",a:["INNER JOIN","FULL JOIN","SELF JOIN","Equijoin"],c:1,e:"FULL JOIN keeps all left and right rows."},
+{q:"What is an outer join?",a:["Any join that selects unmatched rows","A join with no tables","Only an INNER JOIN","A deleted join"],c:0,e:"Left, right, and full joins are outer joins."},
+{q:"What is an equijoin?",a:["A join using = to compare columns","A join with no ON clause","A join using only < or >","A join to itself"],c:0,e:"Equijoins compare columns using the equals operator."},
+{q:"What is a self-join?",a:["A table joined to itself","A join with no conditions","A join between three tables","A view refresh"],c:0,e:"A self-join joins a table to itself."},
+{q:"What does a cross-join produce?",a:["Only matching rows","All possible combinations of rows","No rows","Only NULL rows"],c:1,e:"Cross joins return every combination of rows from both tables."},
+{q:"What is a subquery?",a:["A query within another SQL query","A deleted query","A query with no SELECT","A table name"],c:0,e:"Subqueries are nested inside another query."},
+{q:"What is an alias?",a:["A temporary name for a column or table","A permanent primary key","A type of normal form","An index block"],c:0,e:"Aliases give temporary names using AS or implied syntax."},
+{q:"What is a materialized view?",a:["A view with stored data","A view that cannot be queried","A table without rows","A deleted table"],c:0,e:"Materialized views store view data and must be refreshed when base tables change."},
+{q:"What does WITH CHECK OPTION do?",a:["Rejects inserts and updates that do not satisfy the view WHERE clause","Deletes all view data","Creates a foreign key","Sorts a view"],c:0,e:"WITH CHECK OPTION enforces the view condition on inserts and updates."},
+{q:"What is an entity in ER modeling?",a:["A person, place, product, concept, or activity","Only a numeric column","A SQL keyword","A storage block"],c:0,e:"Entities are major things the database tracks."},
+{q:"What is an attribute?",a:["A descriptive property of an entity","A deleted row","A query processor","A table scan"],c:0,e:"Attributes describe entities."},
+{q:"What is a reflexive relationship?",a:["A relationship where an entity relates to itself","A relationship with no attributes","A relationship that deletes rows","A relationship between indexes"],c:0,e:"Reflexive relationships connect an entity type to itself."},
+{q:"What does cardinality refer to?",a:["Maximums and minimums of relationships and attributes","Only table names","SQL comments","Index syntax"],c:0,e:"Cardinality describes how many instances may or must participate."},
+{q:"What is a subtype entity?",a:["A subset of a supertype entity","A duplicate database","A query result","A weak password"],c:0,e:"A subtype is a more specific subset of a supertype."},
+{q:"What is an IsA relationship?",a:["An identifying relationship between supertype and subtype","A table scan","A DCL command","An aggregate function"],c:0,e:"The identifying relationship for supertype/subtype is IsA."},
+{q:"Which quality should a primary key have?",a:["Stable, simple, and meaningless","Long, descriptive, and changing","Nullable and duplicated","Hidden and random text only"],c:0,e:"Good primary keys should be stable, simple, and meaningless."},
+{q:"What is an artificial key?",a:["A designer-created single-column primary key when no suitable key exists","A broken foreign key","A duplicate row","A stored view"],c:0,e:"Artificial keys are often automatically generated integers."},
+{q:"What is functional dependence?",a:["Dependence of one column on another","A physical table order","A SQL comment","A file-system command"],c:0,e:"Functional dependence means one column value determines another."},
+{q:"What is redundancy?",a:["Repetition of related values in a table","The absence of data","A foreign key constraint","An index scan"],c:0,e:"Redundancy is repeated related data."},
+{q:"What is normalization?",a:["Eliminating redundancy by decomposing tables","Adding duplicate values intentionally","Sorting rows physically","Creating all possible joins"],c:0,e:"Normalization reduces redundancy through better table design."},
+{q:"Which normal form is described as the gold standard?",a:["First normal form","Second normal form","Third normal form","Boyce-Codd normal form"],c:3,e:"BCNF is described as the gold standard."},
+{q:"What is denormalization?",a:["Intentionally introducing redundancy by merging tables","Removing all redundancy","Deleting tables","Creating foreign keys only"],c:0,e:"Denormalization can improve performance by adding controlled redundancy."},
+{q:"Which table structure imposes no order on rows?",a:["Heap table","Sorted table","Hash table","Table cluster"],c:0,e:"Heap tables do not impose row order."},
+{q:"Which table type is especially fast for bulk loading many rows?",a:["Heap table","Sorted table","Bitmap table","View table"],c:0,e:"Heap tables store rows in load order and optimize inserts."},
+{q:"What is a table scan?",a:["Reading table blocks directly without using an index","Reading only an index","Deleting all rows","Creating a table"],c:0,e:"A table scan reads the table itself directly."},
+{q:"What is an index scan?",a:["Reading index blocks sequentially to locate table blocks","Deleting an index","Reading all rows randomly","Creating a view"],c:0,e:"Index scans use index blocks to find needed table blocks."},
+{q:"What is hit ratio/filter factor/selectivity?",a:["The percentage of table rows selected by a query","The number of tables in a database","The size of a primary key","The number of users"],c:0,e:"Selectivity describes what percentage of rows a query selects."},
+{q:"What does a dense index contain?",a:["An entry for every table row","An entry for every table block","Only NULL values","Only primary keys"],c:0,e:"Dense indexes include one entry per table row."},
+{q:"What does a sparse index contain?",a:["An entry for every table block","An entry for every table row","No entries","Only bitmap entries"],c:0,e:"Sparse indexes include entries for table blocks."}
+];
+function renderQuiz(){const quiz=document.getElementById('quiz');quiz.innerHTML='';questions.forEach((item,i)=>{const div=document.createElement('div');div.className='question';div.innerHTML=`<h3>${i+1}. ${item.q}</h3><div class="answers">${item.a.map((ans,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${ans}</label>`).join('')}</div><button onclick="submitQuestion(${i})">Submit This Question</button><div class="result" id="r${i}"></div><div class="explain" id="e${i}"></div>`;quiz.appendChild(div);});}
+function gradeQuestion(i){const item=questions[i];const selected=document.querySelector(`input[name="q${i}"]:checked`);const r=document.getElementById(`r${i}`);const ex=document.getElementById(`e${i}`);if(!selected){r.textContent='Please choose an answer first.';r.className='result incorrect';ex.textContent='';return null;}if(Number(selected.value)===item.c){r.textContent='Correct';r.className='result correct';ex.textContent=item.e;return true;}else{r.textContent=`Incorrect. Correct answer: ${item.a[item.c]}`;r.className='result incorrect';ex.textContent=item.e;return false;}}
+function submitQuestion(i){gradeQuestion(i);}
+function submitQuiz(){let score=0;let answered=0;questions.forEach((item,i)=>{const result=gradeQuestion(i);if(result!==null){answered++;if(result)score++;}});document.getElementById('score').textContent=`Score: ${score} / ${questions.length} (${Math.round(score/questions.length*100)}%) — Answered: ${answered} / ${questions.length}`;window.scrollTo({top:0,behavior:'smooth'});}
+function resetQuiz(){document.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);questions.forEach((_,i)=>{document.getElementById(`r${i}`).textContent='';document.getElementById(`e${i}`).textContent='';});document.getElementById('score').textContent='';}
+renderQuiz();
+</script>
+</body>
+</html>
